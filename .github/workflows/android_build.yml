@@ -3,6 +3,7 @@ name: Android CI/CD Build
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch: # Allows manual trigger of the build
@@ -37,6 +38,15 @@ jobs:
             echo "✅ Gradle wrapper JAR is present and valid."
           fi
 
+      - name: Recreate Keystore from Base64
+        run: |
+          if [ -f debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+            echo "✅ debug.keystore successfully recreated from base64"
+          else
+            echo "⚠️ debug.keystore.base64 not found!"
+          fi
+
       - name: Grant Execute Permission to Gradlew
         run: chmod +x gradlew
 
@@ -46,11 +56,46 @@ jobs:
             cp .env.example .env
           fi
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon
 
-      - name: Upload Debug APK
+      - name: Build Release Bundle (AAB)
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Verify Generated Outputs
+        run: |
+          echo "=== Verifying APK output ==="
+          ls -la app/build/outputs/apk/release/
+          if [ ! -f app/build/outputs/apk/release/app-release.apk ]; then
+            echo "❌ app-release.apk was not generated!"
+            exit 1
+          fi
+          echo "=== Verifying AAB output ==="
+          ls -la app/build/outputs/bundle/release/
+          if [ ! -f app/build/outputs/bundle/release/app-release.aab ]; then
+            echo "❌ app-release.aab was not generated!"
+            exit 1
+          fi
+          echo "✅ Both artifacts generated successfully!"
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+          name: app-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Create GitHub Release and Attach Artifacts
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/bundle/release/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
