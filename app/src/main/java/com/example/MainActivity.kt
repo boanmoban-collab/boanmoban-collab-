@@ -335,7 +335,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), gap = 12.dp) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     // Node Version input
                     OutlinedTextField(
                         value = nodeVersion,
@@ -876,7 +876,7 @@ fun TerminalTab(viewModel: MainViewModel) {
                 ) {
                     if (logs.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterAlignment) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(Icons.Default.Terminal, contentDescription = "Console", tint = Color.DarkGray, modifier = Modifier.size(36.dp))
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text("Click 'Run Simulation' to start compiling", color = Color.DarkGray, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
@@ -1068,7 +1068,7 @@ fun GitHubTab(viewModel: MainViewModel) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), gap = 12.dp) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     // Owner
                     OutlinedTextField(
                         value = owner,
@@ -1108,7 +1108,7 @@ fun GitHubTab(viewModel: MainViewModel) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), gap = 12.dp) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     // Workflow ID
                     OutlinedTextField(
                         value = workflowId,
@@ -1621,31 +1621,4 @@ fun AssetsTab(viewModel: MainViewModel) {
 
 // --- Dynamic Animations Helpers ---
 @Composable
-fun RowScopeGap(modifier: Modifier = Modifier, gap: Int, content: @Composable RowScopeGap.() -> Unit) {
-    // Spacer helper
-}
-
-@Composable
-fun Row(modifier: Modifier = Modifier, gap: Int, content: @Composable RowScope.() -> Unit) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(gap.dp),
-        content = content
-    )
-}
-
-@Composable
 fun Modifier.animateEnterExit(): Modifier = this // stub animation modifier
-
-@Composable
-fun ColumnScope.Row(modifier: Modifier = Modifier, gap: Int, content: @Composable RowScope.() -> Unit) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(gap.dp),
-        content = content
-    )
-}
-
-interface RowScopeGap {
-    // helper
-}

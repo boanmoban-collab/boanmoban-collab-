@@ -1,8 +1,36 @@
-node_modules/
+# Android Gradle build outputs and caches
+.gradle/
 build/
-dist/
-coverage/
+app/build/
+.build-outputs/
+.kotlin/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+
+# Gradle local properties and signing keys
+local.properties
+*.keystore
+*.jks
+!debug.keystore # if we want to track debug keystore
+*.apk
+*.aab
+
+# System / OS files
 .DS_Store
+Thumbs.db
+
+# Environment variables & secrets
+.env
+.env.production
+.env.local
+.env.*.local
+
+# Logs and temporary files
 *.log
-.env*
-!.env.example
+java_pid*.hprof
+package.json # since package.json was just a workaround to avoid node build errors
