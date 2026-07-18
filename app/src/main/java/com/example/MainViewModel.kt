@@ -26,6 +26,14 @@ import kotlin.random.Random
 
 class MainViewModel : ViewModel() {
 
+    // --- Language state ---
+    private val _language = MutableStateFlow("en") // "en" for English, "ar" for Arabic
+    val language: StateFlow<String> = _language.asStateFlow()
+
+    fun setLanguage(lang: String) {
+        _language.value = lang
+    }
+
     // --- Tab state ---
     private val _activeTab = MutableStateFlow("generator")
     val activeTab: StateFlow<String> = _activeTab.asStateFlow()

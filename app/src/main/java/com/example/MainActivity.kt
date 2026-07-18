@@ -87,6 +87,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -103,6 +104,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -112,10 +114,157 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+
+object Loc {
+    fun t(key: String, lang: String): String {
+        val ar = mapOf(
+            "app_title" to "لوحة تحكم إكسبو",
+            "app_subtitle" to "بناء الأصول والتكامل المستمر لجيت هاب",
+            "tab_generator" to "المولد",
+            "tab_terminal" to "المحاكي",
+            "tab_github" to "جيت هاب",
+            "tab_assets" to "الأصول",
+            "workflow_params" to "معاملات سير العمل",
+            "project_name" to "اسم المشروع",
+            "node_version" to "إصدار Node.js",
+            "expo_sdk" to "إصدار إكسبو SDK",
+            "package_mgr" to "مدير الحزم",
+            "target_artifact" to "القطعة المستهدفة",
+            "config_cache" to "تكوين ذاكرة تخزين مؤقت",
+            "config_cache_desc" to "الاحتفاظ بذاكرة تخزين مؤقت لـ Gradle بين عمليات سير العمل",
+            "decode_keystore" to "فك تشفير مستودع المفاتيح JKS",
+            "decode_keystore_desc" to "تهيئة خطوات فك التشفير Base64 والتوقيع",
+            "copy_code" to "نسخ الكود",
+            "copied" to "تم النسخ",
+            "copied_toast" to "تم نسخ برنامج YAML البرمجي إلى الحافظة!",
+            "runner_env_config" to "تكوين بيئة التشغيل",
+            "injected_failure" to "محاكاة الفشل المحقون",
+            "sim_speed" to "مضاعف سرعة المحاكاة",
+            "sim_speed_val" to "سرعة",
+            "run_sim" to "بدء المحاكاة",
+            "reset" to "إعادة ضبط",
+            "runner_pipeline" to "خطوات التشغيل",
+            "passed" to "ناجح",
+            "failed" to "فشل",
+            "queued" to "في الانتظار",
+            "compilation_success" to "نجح البناء بشكل مثالي!",
+            "compilation_success_desc" to "تم تنفيذ إجراء GitHub الخاص بك دون أي خطأ في البناء. مقاييس مخرجات APK الصادرة:",
+            "run_id" to "معرف التشغيل",
+            "artifact_title" to "عنوان الملف",
+            "apk_size" to "حجم حزمة APK",
+            "install_apk_sim" to "تثبيت ملف APK الموقع (محاكاة)",
+            "pipeline_debugger" to "مصحح أخطاء خط الأنابيب التفاعلي",
+            "github_api_integration" to "تكامل واجهة برمجة تطبيقات جيت هاب",
+            "github_api_desc" to "توصيل الإجراءات الحية لتشغيل تدفقات العمل",
+            "pat_label" to "رمز الوصول الشخصي (التقليدي)",
+            "repo_owner" to "مالك المستودع",
+            "repo_name" to "اسم المستودع",
+            "workflow_id_label" to "معرف سير العمل (اختياري)",
+            "git_ref" to "فرع جيت",
+            "test_connect" to "اختبار الاتصال",
+            "trigger_dispatch" to "بدء التشغيل",
+            "runs_history" to "سجل عمليات سير العمل الأخيرة",
+            "gemini_assets" to "استوديو أصول جيميني",
+            "gemini_assets_desc" to "تولد أيقونات تشغيل احترافية ورسومات ترحيبية",
+            "visual_prompt" to "وصف المطالبة المرئية",
+            "popular_suggestions" to "الاقتراحات الشائعة",
+            "asset_type_target" to "نوع الأصل المستهدف",
+            "target_aspect_ratio" to "نسبة العرض إلى الارتفاع المستهدفة",
+            "studio_model" to "نموذج الاستوديو الاحترافي",
+            "studio_model_desc" to "استخدام أوزان عالية الدقة (يتطلب حصة واجهة البرمجة)",
+            "generate_native_asset" to "توليد الأصل الأصلي",
+            "rendering_asset" to "جاري رندر أصل الاستوديو...",
+            "generated_preview" to "معاينة الأصل المولد",
+            "download_studio_asset" to "تنزيل أصل الاستوديو",
+            "save_asset_toast" to "تم حفظ الأصل بنجاح في معرض الصور!",
+            "awaiting_generation" to "في انتظار تعليمات التوليد البصري...",
+            "rendering_pixels" to "تحليل المطالبات ورسم البكسلات...",
+            "click_to_compile" to "انقر على 'بدء المحاكاة' لبدء التجميع",
+            "step_install" to "تثبيت الاعتماديات",
+            "step_typescript" to "فحص لغة TypeScript",
+            "step_lint" to "فحص جودة الكود",
+            "step_tests" to "اختبارات الوحدة",
+            "step_build" to "بناء أندرويد الأصلي (Gradle)",
+            "step_apk" to "توليد ملف APK والمخرجات"
+        )
+        val en = mapOf(
+            "app_title" to "Expo Actions Console",
+            "app_subtitle" to "GitHub CI/CD & Asset Builder",
+            "tab_generator" to "Generator",
+            "tab_terminal" to "Simulator",
+            "tab_github" to "GitHub",
+            "tab_assets" to "Assets",
+            "workflow_params" to "Workflow Parameters",
+            "project_name" to "Project Name",
+            "node_version" to "Node.js Version",
+            "expo_sdk" to "Expo SDK",
+            "package_mgr" to "Package Manager",
+            "target_artifact" to "Target Artifact",
+            "config_cache" to "Configure Runner Cache",
+            "config_cache_desc" to "Persist Gradle caches between workflow runs",
+            "decode_keystore" to "Decode Android Keystore JKS",
+            "decode_keystore_desc" to "Configure Base64 decoding and apksigner signing steps",
+            "copy_code" to "Copy Code",
+            "copied" to "Copied",
+            "copied_toast" to "Copied YAML script to clipboard!",
+            "runner_env_config" to "Runner Environment Configuration",
+            "injected_failure" to "Injected Failure Simulation",
+            "sim_speed" to "Simulation Speed Multiplier",
+            "sim_speed_val" to "x Speed",
+            "run_sim" to "Run Simulation",
+            "reset" to "Reset",
+            "runner_pipeline" to "Runner Pipeline Steps",
+            "passed" to "Passed",
+            "failed" to "Failed",
+            "queued" to "Queued",
+            "compilation_success" to "Compilation Succeeded Perfectly!",
+            "compilation_success_desc" to "Your GitHub action executed without a single native compilation error. Released APK output metrics:",
+            "run_id" to "Run Identifier",
+            "artifact_title" to "Artifact Title",
+            "apk_size" to "APK Package Size",
+            "install_apk_sim" to "Install Signed APK (Simulated)",
+            "pipeline_debugger" to "Interactive Pipeline Debugger",
+            "github_api_integration" to "GitHub API Integration",
+            "github_api_desc" to "Connect live actions to trigger dispatch workflows",
+            "pat_label" to "Personal Access Token (classic)",
+            "repo_owner" to "Repo Owner",
+            "repo_name" to "Repo Name",
+            "workflow_id_label" to "Workflow ID (Optional)",
+            "git_ref" to "Git Ref",
+            "test_connect" to "Test Connect",
+            "trigger_dispatch" to "Trigger Dispatch",
+            "runs_history" to "Recent Workflow Runs History",
+            "gemini_assets" to "Gemini Asset Studio",
+            "gemini_assets_desc" to "Generate professional launcher icons & splash illustrations",
+            "visual_prompt" to "Visual Prompt Description",
+            "popular_suggestions" to "Popular Suggestions",
+            "asset_type_target" to "Asset Type Target",
+            "target_aspect_ratio" to "Target Aspect Ratio",
+            "studio_model" to "Professional Studio Model",
+            "studio_model_desc" to "Use high-fidelity weights (requires API quota)",
+            "generate_native_asset" to "Generate Native Asset",
+            "rendering_asset" to "Rendering Studio Asset...",
+            "generated_preview" to "Generated Asset Preview",
+            "download_studio_asset" to "Download Studio Asset",
+            "save_asset_toast" to "Saved asset successfully to Android gallery!",
+            "awaiting_generation" to "Awaiting visual generation instructions...",
+            "rendering_pixels" to "Parsing prompts and rendering pixels...",
+            "click_to_compile" to "Click 'Run Simulation' to start compiling",
+            "step_install" to "Install Dependencies",
+            "step_typescript" to "TypeScript Check",
+            "step_lint" to "Linter Checks",
+            "step_tests" to "Unit Tests",
+            "step_build" to "Android Native Build (Gradle)",
+            "step_apk" to "APK & Artifact Generation"
+        )
+        return (if (lang == "ar") ar[key] else en[key]) ?: key
+    }
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,123 +295,168 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppScreen(viewModel: MainViewModel = viewModel()) {
     val activeTab by viewModel.activeTab.collectAsState()
+    val language by viewModel.language.collectAsState()
     val scope = rememberCoroutineScope()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        bottomBar = {
+    val layoutDirection = if (language == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
+    CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0x0E, 0x0C, 0x15))
+                        .navigationBarsPadding()
+                ) {
+                    HorizontalDivider(color = Color(0x23, 0x1F, 0x33))
+                    TabRow(
+                        selectedTabIndex = when (activeTab) {
+                            "generator" -> 0
+                            "terminal" -> 1
+                            "github" -> 2
+                            "assets" -> 3
+                            else -> 0
+                        },
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.SecondaryIndicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[when (activeTab) {
+                                    "generator" -> 0
+                                    "terminal" -> 1
+                                    "github" -> 2
+                                    "assets" -> 3
+                                    else -> 0
+                                }]),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    ) {
+                        val tabs = listOf(
+                            Triple("generator", Loc.t("tab_generator", language), Icons.Default.Code),
+                            Triple("terminal", Loc.t("tab_terminal", language), Icons.Default.Terminal),
+                            Triple("github", Loc.t("tab_github", language), Icons.Default.Hub),
+                            Triple("assets", Loc.t("tab_assets", language), Icons.Default.AutoAwesome)
+                        )
+                        tabs.forEachIndexed { index, pair ->
+                            Tab(
+                                selected = activeTab == pair.first,
+                                onClick = { viewModel.setActiveTab(pair.first) },
+                                text = { Text(pair.second, fontSize = 11.sp, fontWeight = FontWeight.SemiBold) },
+                                icon = { Icon(pair.third, contentDescription = pair.second, modifier = Modifier.size(20.dp)) },
+                                selectedContentColor = MaterialTheme.colorScheme.primary,
+                                unselectedContentColor = Color.Gray,
+                                modifier = Modifier.testTag("tab_${pair.first}")
+                            )
+                        }
+                    }
+                }
+            }
+        ) { innerPadding ->
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0x0E, 0x0C, 0x15))
-                    .navigationBarsPadding()
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .statusBarsPadding()
             ) {
-                HorizontalDivider(color = Color(0x23, 0x1F, 0x33))
-                TabRow(
-                    selectedTabIndex = when (activeTab) {
-                        "generator" -> 0
-                        "terminal" -> 1
-                        "github" -> 2
-                        "assets" -> 3
-                        else -> 0
-                    },
-                    containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.primary,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[when (activeTab) {
-                                "generator" -> 0
-                                "terminal" -> 1
-                                "github" -> 2
-                                "assets" -> 3
-                                else -> 0
-                            }]),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                // Header Bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val tabs = listOf(
-                        Triple("generator", "Generator", Icons.Default.Code),
-                        Triple("terminal", "Simulator", Icons.Default.Terminal),
-                        Triple("github", "GitHub", Icons.Default.Hub),
-                        Triple("assets", "Assets", Icons.Default.AutoAwesome)
-                    )
-                    tabs.forEachIndexed { index, pair ->
-                        Tab(
-                            selected = activeTab == pair.first,
-                            onClick = { viewModel.setActiveTab(pair.first) },
-                            text = { Text(pair.second, fontSize = 11.sp, fontWeight = FontWeight.SemiBold) },
-                            icon = { Icon(pair.third, contentDescription = pair.second, modifier = Modifier.size(20.dp)) },
-                            selectedContentColor = MaterialTheme.colorScheme.primary,
-                            unselectedContentColor = Color.Gray,
-                            modifier = Modifier.testTag("tab_${pair.first}")
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(42.dp)
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(Color(0xA8, 0x55, 0xF7), Color(0x3B, 0x82, 0xF6))
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Build,
+                                contentDescription = "Logo",
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = Loc.t("app_title", language),
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = Loc.t("app_subtitle", language),
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+
+                    // Language Switcher Toggle
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .background(Color(0x1B, 0x19, 0x27), shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0x23, 0x1F, 0x33), shape = RoundedCornerShape(8.dp))
+                            .padding(2.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(if (language == "en") MaterialTheme.colorScheme.primary else Color.Transparent)
+                                .clickable { viewModel.setLanguage("en") }
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "EN",
+                                color = if (language == "en") Color.White else Color.Gray,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(if (language == "ar") MaterialTheme.colorScheme.primary else Color.Transparent)
+                                .clickable { viewModel.setLanguage("ar") }
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "AR",
+                                color = if (language == "ar") Color.White else Color.Gray,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .statusBarsPadding()
-        ) {
-            // Header Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+
+                HorizontalDivider(color = Color(0x23, 0x1F, 0x33))
+
+                // Main Contents switching based on active tab
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(Color(0xA8, 0x55, 0xF7), Color(0x3B, 0x82, 0xF6))
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Build,
-                        contentDescription = "Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = "Expo Actions Console",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "GitHub CI/CD & Asset Builder",
-                        color = Color.Gray,
-                        fontSize = 11.sp
-                    )
-                }
-            }
-
-            HorizontalDivider(color = Color(0x23, 0x1F, 0x33))
-
-            // Main Contents switching based on active tab
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 16.dp)
-            ) {
-                when (activeTab) {
-                    "generator" -> GeneratorTab(viewModel)
-                    "terminal" -> TerminalTab(viewModel)
-                    "github" -> GitHubTab(viewModel)
-                    "assets" -> AssetsTab(viewModel)
+                    when (activeTab) {
+                        "generator" -> GeneratorTab(viewModel)
+                        "terminal" -> TerminalTab(viewModel)
+                        "github" -> GitHubTab(viewModel)
+                        "assets" -> AssetsTab(viewModel)
+                    }
                 }
             }
         }
@@ -272,6 +466,7 @@ fun AppScreen(viewModel: MainViewModel = viewModel()) {
 // --- GENERATOR TAB COMPOSABLE ---
 @Composable
 fun GeneratorTab(viewModel: MainViewModel) {
+    val language by viewModel.language.collectAsState()
     val projectName by viewModel.projectName.collectAsState()
     val nodeVersion by viewModel.nodeVersion.collectAsState()
     val expoSdkVersion by viewModel.expoSdkVersion.collectAsState()
@@ -308,7 +503,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Workflow Parameters",
+                    text = Loc.t("workflow_params", language),
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
@@ -319,7 +514,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
                 OutlinedTextField(
                     value = projectName,
                     onValueChange = { viewModel.projectName.value = it },
-                    label = { Text("Project Name") },
+                    label = { Text(Loc.t("project_name", language)) },
                     textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -340,7 +535,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
                     OutlinedTextField(
                         value = nodeVersion,
                         onValueChange = { viewModel.nodeVersion.value = it },
-                        label = { Text("Node.js Version") },
+                        label = { Text(Loc.t("node_version", language)) },
                         textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -359,7 +554,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
                     OutlinedTextField(
                         value = expoSdkVersion,
                         onValueChange = { viewModel.expoSdkVersion.value = it },
-                        label = { Text("Expo SDK") },
+                        label = { Text(Loc.t("expo_sdk", language)) },
                         textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -378,7 +573,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Package Manager Selector
-                Text("Package Manager", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text(Loc.t("package_mgr", language), color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -415,7 +610,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Build Type Selector
-                Text("Target Artifact", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text(Loc.t("target_artifact", language), color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -457,9 +652,9 @@ fun GeneratorTab(viewModel: MainViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text("Configure Runner Cache", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                        Text("Persist Gradle caches between workflow runs", color = Color.Gray, fontSize = 10.sp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(Loc.t("config_cache", language), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Text(Loc.t("config_cache_desc", language), color = Color.Gray, fontSize = 10.sp)
                     }
                     Switch(
                         checked = useCache,
@@ -482,9 +677,9 @@ fun GeneratorTab(viewModel: MainViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text("Decode Android Keystore JKS", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                        Text("Configure Base64 decoding and apksigner signing steps", color = Color.Gray, fontSize = 10.sp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(Loc.t("decode_keystore", language), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Text(Loc.t("decode_keystore_desc", language), color = Color.Gray, fontSize = 10.sp)
                     }
                     Switch(
                         checked = customKeystore,
@@ -535,7 +730,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
                         onClick = {
                             clipboardManager.setText(AnnotatedString(yamlContent))
                             copied = true
-                            Toast.makeText(context, "Copied YAML script to clipboard!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, Loc.t("copied_toast", language), Toast.LENGTH_SHORT).show()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (copied) Color(0x22, 0xC5, 0x5E) else Color(0x24, 0x1F, 0x38),
@@ -553,13 +748,11 @@ fun GeneratorTab(viewModel: MainViewModel) {
                                 modifier = Modifier.size(13.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(if (copied) "Copied" else "Copy Code", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(if (copied) Loc.t("copied", language) else Loc.t("copy", language), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(12.dp))
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -584,6 +777,7 @@ fun GeneratorTab(viewModel: MainViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TerminalTab(viewModel: MainViewModel) {
+    val language by viewModel.language.collectAsState()
     val speedFactor by viewModel.simulationSpeed.collectAsState()
     val errType by viewModel.selectedError.collectAsState()
     val isBuilding by viewModel.isBuilding.collectAsState()
@@ -616,7 +810,7 @@ fun TerminalTab(viewModel: MainViewModel) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Runner Environment Configuration",
+                    text = Loc.t("runner_env_config", language),
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
@@ -624,16 +818,23 @@ fun TerminalTab(viewModel: MainViewModel) {
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // Error Selection dropdown/segmented button
-                Text("Injected Failure Simulation", color = Color.Gray, fontSize = 12.sp)
+                Text(Loc.t("injected_failure", language), color = Color.Gray, fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(6.dp))
 
                 var expanded by remember { mutableStateOf(false) }
-                val errorLabels = mapOf(
+                val errorLabelsEn = mapOf(
                     "none" to "No Errors (Full Success Pass)",
                     "keystore" to "Apksigner Failure (Keystore Base64 Empty)",
                     "memory" to "OutOfMemoryError (Heap Crash)",
                     "jdk" to "JDK Version Mismatch (JVM Unsupported)"
                 )
+                val errorLabelsAr = mapOf(
+                    "none" to "لا توجد أخطاء (نجاح كامل)",
+                    "keystore" to "فشل apksigner (مستودع المفاتيح Base64 فارغ)",
+                    "memory" to "خطأ نفاد الذاكرة OutOfMemoryError",
+                    "jdk" to "عدم تطابق إصدار JDK (البيئة غير مدعومة)"
+                )
+                val errorLabels = if (language == "ar") errorLabelsAr else errorLabelsEn
 
                 ExposedDropdownMenuBox(
                     expanded = expanded,
@@ -682,8 +883,8 @@ fun TerminalTab(viewModel: MainViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Simulation Speed Multiplier", color = Color.White, fontSize = 13.sp)
-                    Text("${speedFactor.toInt()}x Speed", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(Loc.t("sim_speed", language), color = Color.White, fontSize = 13.sp)
+                    Text("${speedFactor.toInt()}${Loc.t("sim_speed_val", language)}", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Slider(
@@ -722,7 +923,7 @@ fun TerminalTab(viewModel: MainViewModel) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.PlayArrow, contentDescription = "Run", modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Run Simulation", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text(Loc.t("run_sim", language), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -746,7 +947,7 @@ fun TerminalTab(viewModel: MainViewModel) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Refresh, contentDescription = "Reset", modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Reset", fontSize = 13.sp)
+                            Text(Loc.t("reset", language), fontSize = 13.sp)
                         }
                     }
                 }
@@ -762,7 +963,7 @@ fun TerminalTab(viewModel: MainViewModel) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Runner Pipeline Steps",
+                    text = Loc.t("runner_pipeline", language),
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
@@ -774,6 +975,17 @@ fun TerminalTab(viewModel: MainViewModel) {
                     val isSuccess = step.status == "success"
                     val isFailed = step.status == "failed"
                     val isRunning = step.status == "running"
+
+                    val stepNameKey = when (step.name) {
+                        "Install Dependencies" -> "step_install"
+                        "TypeScript Check" -> "step_typescript"
+                        "Linter Checks" -> "step_lint"
+                        "Unit Tests" -> "step_tests"
+                        "Android Native Build (Gradle)" -> "step_build"
+                        "APK & Artifact Generation" -> "step_apk"
+                        else -> step.name
+                    }
+                    val displayStepName = if (stepNameKey.startsWith("step_")) Loc.t(stepNameKey, language) else step.name
 
                     Row(
                         modifier = Modifier
@@ -806,7 +1018,7 @@ fun TerminalTab(viewModel: MainViewModel) {
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = step.name,
+                                text = displayStepName,
                                 color = if (isRunning || isSuccess) Color.White else Color.Gray,
                                 fontSize = 13.sp,
                                 fontWeight = if (isRunning) FontWeight.Bold else FontWeight.Medium
@@ -821,11 +1033,11 @@ fun TerminalTab(viewModel: MainViewModel) {
                                 fontWeight = FontWeight.Bold
                             )
                         } else if (isSuccess) {
-                            Text("Passed", color = Color(0xFF, 0x4B, 0x55, 0xE2).let { Color(0x22, 0xC5, 0x5E) }, fontSize = 12.sp)
+                            Text(Loc.t("passed", language), color = Color(0x22, 0xC5, 0x5E), fontSize = 12.sp)
                         } else if (isFailed) {
-                            Text("Failed", color = Color(0xEF, 0x44, 0x44), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(Loc.t("failed", language), color = Color(0xEF, 0x44, 0x44), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         } else {
-                            Text("Queued", color = Color.DarkGray, fontSize = 12.sp)
+                            Text(Loc.t("queued", language), color = Color.DarkGray, fontSize = 12.sp)
                         }
                     }
                     if (index < buildSteps.size - 1) {
@@ -879,7 +1091,7 @@ fun TerminalTab(viewModel: MainViewModel) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(Icons.Default.Terminal, contentDescription = "Console", tint = Color.DarkGray, modifier = Modifier.size(36.dp))
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text("Click 'Run Simulation' to start compiling", color = Color.DarkGray, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                                Text(Loc.t("click_to_compile", language), color = Color.DarkGray, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
                             }
                         }
                     } else {
@@ -923,23 +1135,23 @@ fun TerminalTab(viewModel: MainViewModel) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.CheckCircle, "Success", tint = Color(0x4A, 0xDF, 0x5D), modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Compilation Succeeded Perfectly!", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        Text(Loc.t("compilation_success", language), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text("Your GitHub action executed without a single native compilation error. Released APK output metrics:", color = Color.LightGray, fontSize = 11.sp)
+                    Text(Loc.t("compilation_success_desc", language), color = Color.LightGray, fontSize = 11.sp)
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
-                            Text("Run Identifier", color = Color.Gray, fontSize = 9.sp)
+                            Text(Loc.t("run_id", language), color = Color.Gray, fontSize = 9.sp)
                             Text(data.runId, color = Color.White, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         }
                         Column {
-                            Text("Artifact Title", color = Color.Gray, fontSize = 9.sp)
+                            Text(Loc.t("artifact_title", language), color = Color.Gray, fontSize = 9.sp)
                             Text(data.artifactName, color = Color.White, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
                         }
                         Column {
-                            Text("APK Package Size", color = Color.Gray, fontSize = 9.sp)
+                            Text(Loc.t("apk_size", language), color = Color.Gray, fontSize = 9.sp)
                             Text(data.apkSize, color = Color.White, fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -958,7 +1170,7 @@ fun TerminalTab(viewModel: MainViewModel) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Download, "Download", modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Install Signed APK (Simulated)", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text(Loc.t("install_apk_sim", language), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -977,14 +1189,14 @@ fun TerminalTab(viewModel: MainViewModel) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Error, "Error Info", tint = Color(0xF4, 0x3F, 0x5E), modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Interactive Pipeline Debugger", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        Text(Loc.t("pipeline_debugger", language), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(10.dp))
-                    
-                    val diagnostics = when (errType) {
+
+                    val diagEn = when (errType) {
                         "jdk" -> Pair(
                             "JDK Out-of-Date Environment Error",
-                            "The target Android Gradle Plugin compiled package requires JDK 17, but the runtime Ubuntu workspace was running JDK 11.\n\n✔️ Fix: Verify and replace your setup-java configuration block in workflow.yml to use java-version: '17' explicitly."
+                            "The target Android Gradle Plugin compiled package requires JDK 21, but the runtime Ubuntu workspace was running JDK 11.\n\n✔️ Fix: Verify and replace your setup-java configuration block in workflow.yml to use java-version: '21' explicitly."
                         )
                         "memory" -> Pair(
                             "Gradle Compiler JVM Heap Space Out-of-Memory",
@@ -996,6 +1208,24 @@ fun TerminalTab(viewModel: MainViewModel) {
                         )
                         else -> Pair("Undefined Build Failure", "No failure details compiled. Check raw console outputs above.")
                     }
+
+                    val diagAr = when (errType) {
+                        "jdk" -> Pair(
+                            "خطأ في إصدار JDK بيئة قديمة",
+                            "تتطلب حزمة تجميع المكون الإضافي لـ Gradle إصدار JDK 21، ولكن بيئة العمل في Ubuntu كانت تقوم بتشغيل JDK 11.\n\n✔️ الإصلاح: تحقق من إعداد setup-java في ملف workflow.yml واستخدم java-version: '21'."
+                        )
+                        "memory" -> Pair(
+                            "نفاد ذاكرة مجمع Gradle OOM",
+                            "وصلت عملية daemon الخاصة بمجمع Android إلى الحد الأقصى من الذاكرة المخصصة وتم إنهاؤها بواسطة Linux OOM-killer.\n\n✔️ الإصلاح: قم بتحديث معاملات الذاكرة في gradle.properties باستخدام -Xmx3072m لمنح البيئة ذاكرة كافية."
+                        )
+                        "keystore" -> Pair(
+                            "خطأ مصادقة توقيع مستودع المفاتيح Keystore",
+                            "فشلت أداة apksigner برمز إرجاع غير صفري لأن سلسلة Base64 لفك تشفير مستودع المفاتيح كانت فارغة أو منتهية الصلاحية.\n\n✔️ الإصلاح: تأكد من حفظ سلسلة Base64 لمستودع المفاتيح JKS في GitHub Secrets وتعيين كلمات المرور بشكل صحيح."
+                        )
+                        else -> Pair("فشل بناء غير محدد", "لم يتم تجميع تفاصيل الفشل. تحقق من مخرجات الكونسول في الأعلى.")
+                    }
+
+                    val diagnostics = if (language == "ar") diagAr else diagEn
 
                     Text(diagnostics.first, color = Color(0xF4, 0x3F, 0x5E), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(6.dp))
@@ -1009,6 +1239,7 @@ fun TerminalTab(viewModel: MainViewModel) {
 // --- GITHUB TAB COMPOSABLE ---
 @Composable
 fun GitHubTab(viewModel: MainViewModel) {
+    val language by viewModel.language.collectAsState()
     val token by viewModel.githubToken.collectAsState()
     val owner by viewModel.githubOwner.collectAsState()
     val repo by viewModel.githubRepo.collectAsState()
@@ -1035,13 +1266,13 @@ fun GitHubTab(viewModel: MainViewModel) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "GitHub API Integration",
+                    text = Loc.t("github_api_integration", language),
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Connect live actions to trigger dispatch workflows",
+                    text = Loc.t("github_api_desc", language),
                     color = Color.Gray,
                     fontSize = 11.sp
                 )
@@ -1051,7 +1282,7 @@ fun GitHubTab(viewModel: MainViewModel) {
                 OutlinedTextField(
                     value = token,
                     onValueChange = { viewModel.githubToken.value = it },
-                    label = { Text("Personal Access Token (classic)") },
+                    label = { Text(Loc.t("pat_label", language)) },
                     textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
                     visualTransformation = PasswordVisualTransformation(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -1073,7 +1304,7 @@ fun GitHubTab(viewModel: MainViewModel) {
                     OutlinedTextField(
                         value = owner,
                         onValueChange = { viewModel.githubOwner.value = it },
-                        label = { Text("Repo Owner") },
+                        label = { Text(Loc.t("repo_owner", language)) },
                         textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -1091,7 +1322,7 @@ fun GitHubTab(viewModel: MainViewModel) {
                     OutlinedTextField(
                         value = repo,
                         onValueChange = { viewModel.githubRepo.value = it },
-                        label = { Text("Repo Name") },
+                        label = { Text(Loc.t("repo_name", language)) },
                         textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -1113,7 +1344,7 @@ fun GitHubTab(viewModel: MainViewModel) {
                     OutlinedTextField(
                         value = workflowId,
                         onValueChange = { viewModel.githubWorkflowId.value = it },
-                        label = { Text("Workflow ID (Optional)") },
+                        label = { Text(Loc.t("workflow_id_label", language)) },
                         textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -1131,7 +1362,7 @@ fun GitHubTab(viewModel: MainViewModel) {
                     OutlinedTextField(
                         value = ref,
                         onValueChange = { viewModel.githubRef.value = it },
-                        label = { Text("Git Ref") },
+                        label = { Text(Loc.t("git_ref", language)) },
                         textStyle = TextStyle(color = Color.White, fontSize = 14.sp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -1183,14 +1414,14 @@ fun GitHubTab(viewModel: MainViewModel) {
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0x24, 0x1F, 0x38)),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(1.5f)
                             .height(44.dp)
                             .testTag("btn_github_test")
                     ) {
                         if (loading && dispatchStatus == null) {
                             CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
                         } else {
-                            Text("Test Connect", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(Loc.t("test_connect", language), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -1203,7 +1434,7 @@ fun GitHubTab(viewModel: MainViewModel) {
                         ),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
-                            .weight(1.2f)
+                            .weight(1.8f)
                             .height(44.dp)
                             .testTag("btn_github_dispatch")
                     ) {
@@ -1213,7 +1444,7 @@ fun GitHubTab(viewModel: MainViewModel) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Launch, "Dispatch", modifier = Modifier.size(14.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Trigger Dispatch", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text(Loc.t("trigger_dispatch", language), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -1231,7 +1462,7 @@ fun GitHubTab(viewModel: MainViewModel) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Recent Workflow Runs History",
+                        text = Loc.t("runs_history", language),
                         color = Color.White,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
@@ -1292,6 +1523,7 @@ fun GitHubTab(viewModel: MainViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetsTab(viewModel: MainViewModel) {
+    val language by viewModel.language.collectAsState()
     val prompt by viewModel.assetPrompt.collectAsState()
     val type by viewModel.assetType.collectAsState()
     val size by viewModel.imageSize.collectAsState()
@@ -1321,14 +1553,14 @@ fun AssetsTab(viewModel: MainViewModel) {
                     Icon(Icons.Default.AutoAwesome, "Sparkle", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Gemini Asset Studio",
+                        text = Loc.t("gemini_assets", language),
                         color = Color.White,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Text(
-                    text = "Generate professional launcher icons & splash illustrations",
+                    text = Loc.t("gemini_assets_desc", language),
                     color = Color.Gray,
                     fontSize = 11.sp
                 )
@@ -1338,7 +1570,7 @@ fun AssetsTab(viewModel: MainViewModel) {
                 OutlinedTextField(
                     value = prompt,
                     onValueChange = { viewModel.assetPrompt.value = it },
-                    label = { Text("Visual Prompt Description") },
+                    label = { Text(Loc.t("visual_prompt", language)) },
                     textStyle = TextStyle(color = Color.White, fontSize = 13.sp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -1357,23 +1589,29 @@ fun AssetsTab(viewModel: MainViewModel) {
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // Prompt Suggestions chips
-                Text("Popular Suggestions", color = Color.Gray, fontSize = 11.sp)
+                Text(Loc.t("popular_suggestions", language), color = Color.Gray, fontSize = 11.sp)
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val suggestions = listOf(
+                    val suggestionsEn = listOf(
                         "Dark Neon Hex Grid",
                         "Material Purple Terminal",
                         "Minimal Retro Gradient Icon"
                     )
-                    suggestions.forEach { sug ->
+                    val suggestionsAr = listOf(
+                        "شبكة مسدسة نيون داكنة",
+                        "طرفية بنفسجية مادية",
+                        "أيقونة تدرج ريترو مبسطة"
+                    )
+                    val suggestions = if (language == "ar") suggestionsAr else suggestionsEn
+                    suggestions.forEachIndexed { i, sug ->
                         Box(
                             modifier = Modifier
                                 .background(Color(0x1B, 0x19, 0x27), shape = RoundedCornerShape(8.dp))
                                 .border(1.dp, Color(0x23, 0x1F, 0x33), shape = RoundedCornerShape(8.dp))
-                                .clickable { viewModel.assetPrompt.value = sug }
+                                .clickable { viewModel.assetPrompt.value = suggestionsEn[i] } // Keep English prompt value under the hood
                                 .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Text(sug, color = Color.LightGray, fontSize = 10.sp, fontWeight = FontWeight.Medium)
@@ -1384,32 +1622,38 @@ fun AssetsTab(viewModel: MainViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Asset Type Selector Row
-                Text("Asset Type Target", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text(Loc.t("asset_type_target", language), color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val types = listOf(
+                    val typesEn = listOf(
                         Triple("icon", "App Icon", "1:1"),
                         Triple("splash_portrait", "Splash (Port)", "9:16"),
                         Triple("splash_landscape", "Splash (Land)", "16:9")
                     )
-                    types.forEach { t ->
-                        val selected = type == t.first
+                    val typesAr = listOf(
+                        Triple("icon", "أيقونة التطبيق", "1:1"),
+                        Triple("splash_portrait", "شاشة ترحيب (رأسي)", "9:16"),
+                        Triple("splash_landscape", "شاشة ترحيب (أفقي)", "16:9")
+                    )
+                    val types = if (language == "ar") typesAr else typesEn
+                    types.forEachIndexed { idx, t ->
+                        val selected = type == typesEn[idx].first
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(if (selected) MaterialTheme.colorScheme.primary else Color(0x1B, 0x19, 0x27))
-                                .clickable { viewModel.assetType.value = t.first }
+                                .clickable { viewModel.assetType.value = typesEn[idx].first }
                                 .border(
                                     width = 1.dp,
                                     color = if (selected) Color.Transparent else Color(0x23, 0x1F, 0x33),
                                     shape = RoundedCornerShape(8.dp)
                                 )
-                                .testTag("btn_asset_type_${t.first}"),
+                                .testTag("btn_asset_type_${typesEn[idx].first}"),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -1427,7 +1671,7 @@ fun AssetsTab(viewModel: MainViewModel) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     // Aspect ratio indicator
                     Column {
-                        Text("Target Aspect Ratio", color = Color.White, fontSize = 13.sp)
+                        Text(Loc.t("target_aspect_ratio", language), color = Color.White, fontSize = 13.sp)
                         Text(aspect, color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
 
@@ -1481,9 +1725,9 @@ fun AssetsTab(viewModel: MainViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text("Professional Studio Model", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                        Text("Use high-fidelity weights (requires API quota)", color = Color.Gray, fontSize = 10.sp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(Loc.t("studio_model", language), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Text(Loc.t("studio_model_desc", language), color = Color.Gray, fontSize = 10.sp)
                     }
                     Switch(
                         checked = useStudioModel,
@@ -1520,12 +1764,12 @@ fun AssetsTab(viewModel: MainViewModel) {
                     if (isGenerating) {
                         CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Rendering Studio Asset...", fontSize = 13.sp)
+                        Text(Loc.t("rendering_asset", language), fontSize = 13.sp)
                     } else {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.AutoAwesome, "Sparkle", modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Generate Native Asset", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text(Loc.t("generate_native_asset", language), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -1544,7 +1788,7 @@ fun AssetsTab(viewModel: MainViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Generated Asset Preview",
+                    text = Loc.t("generated_preview", language),
                     color = Color.LightGray,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
@@ -1572,7 +1816,7 @@ fun AssetsTab(viewModel: MainViewModel) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("Parsing prompts and rendering pixels...", color = Color.Gray, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                                Text(Loc.t("rendering_pixels", language), color = Color.Gray, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
                             }
                         }
                         generatedImage != null -> {
@@ -1588,7 +1832,7 @@ fun AssetsTab(viewModel: MainViewModel) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(Icons.Default.AutoAwesome, "Sparkles", tint = Color.DarkGray, modifier = Modifier.size(44.dp))
                                 Spacer(modifier = Modifier.height(10.dp))
-                                Text("Awaiting visual generation instructions...", color = Color.DarkGray, fontSize = 11.sp)
+                                Text(Loc.t("awaiting_generation", language), color = Color.DarkGray, fontSize = 11.sp)
                             }
                         }
                     }
@@ -1598,7 +1842,7 @@ fun AssetsTab(viewModel: MainViewModel) {
                     Spacer(modifier = Modifier.height(14.dp))
                     Button(
                         onClick = {
-                            Toast.makeText(context, "Saved asset successfully to Android gallery!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, Loc.t("save_asset_toast", language), Toast.LENGTH_SHORT).show()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0x1B, 0x19, 0x27)),
                         shape = RoundedCornerShape(8.dp),
@@ -1610,7 +1854,7 @@ fun AssetsTab(viewModel: MainViewModel) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Download, "Save", modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Download Studio Asset", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(Loc.t("download_studio_asset", language), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
