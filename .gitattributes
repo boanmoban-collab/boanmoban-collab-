@@ -1,0 +1,4 @@
+# Ensure Gradle wrapper files are handled correctly by Git
+gradle/wrapper/gradle-wrapper.jar binary
+gradlew text eol=lf
+gradlew.bat text eol=crlf

@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -22,6 +25,17 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
           cache: gradle
+
+      - name: Validate and Repair Gradle Wrapper
+        run: |
+          mkdir -p gradle/wrapper
+          # Check if the gradle-wrapper.jar exists and is a valid zip archive, otherwise fetch a clean version from Gradle repository
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ] || ! unzip -t gradle/wrapper/gradle-wrapper.jar >/dev/null 2>&1; then
+            echo "⚠️ Gradle wrapper JAR is missing or corrupted. Downloading standard Gradle 9.3.1 wrapper JAR..."
+            curl -sSL -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v9.3.1/gradle/wrapper/gradle-wrapper.jar
+          else
+            echo "✅ Gradle wrapper JAR is present and valid."
+          fi
 
       - name: Grant Execute Permission to Gradlew
         run: chmod +x gradlew
