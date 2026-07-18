@@ -1,0 +1,6 @@
+{
+  "name": "Expo Actions Console",
+  "description": "Generate production-ready GitHub Actions workflows for Expo Android builds, simulate and debug native compilation step-by-step, and generate studio-quality app assets using Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
