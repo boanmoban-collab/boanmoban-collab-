@@ -38,13 +38,24 @@ jobs:
             echo "✅ Gradle wrapper JAR is present and valid."
           fi
 
-      - name: Recreate Keystore from Base64
+      - name: Recreate or Generate Keystore
         run: |
-          if [ -f debug.keystore.base64 ]; then
+          if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > debug.keystore
+            echo "✅ debug.keystore successfully restored from GitHub Secrets"
+          elif [ -f debug.keystore.base64 ]; then
             base64 -d debug.keystore.base64 > debug.keystore
-            echo "✅ debug.keystore successfully recreated from base64"
+            echo "✅ debug.keystore successfully recreated from debug.keystore.base64 file"
           else
-            echo "⚠️ debug.keystore.base64 not found!"
+            echo "⚠️ No keystore found in Secrets or Base64 file. Generating fallback debug.keystore..."
+            keytool -genkeypair -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -keypass android \
+              -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug, O=Android, C=US"
+            echo "✅ Fallback debug.keystore generated successfully"
           fi
 
       - name: Grant Execute Permission to Gradlew
