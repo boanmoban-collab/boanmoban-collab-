@@ -1,112 +1,84 @@
-name: Android CI/CD Build
+name: Build Android APK (Expo Native Workflow)
 
 on:
   push:
     branches: [ main, master ]
-    tags: [ 'v*' ]
   pull_request:
-    branches: [ main, master ]
-  workflow_dispatch: # Allows manual trigger of the build
+    branches: [ main ]
+  workflow_dispatch: # Manual build trigger
 
 jobs:
   build:
-    name: Build Android Application
+    name: Build & Release Android App
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout Code
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-        with:
-          lfs: true
-          fetch-depth: 0
 
-      - name: Set up JDK 21
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: ☕ Setup JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
           distribution: 'zulu'
-          cache: gradle
+          java-version: '17'
 
-      - name: Validate and Repair Gradle Wrapper
-        run: |
-          mkdir -p gradle/wrapper
-          # Check if the gradle-wrapper.jar exists and is a valid zip archive, otherwise fetch a clean version from Gradle repository
-          if [ ! -f gradle/wrapper/gradle-wrapper.jar ] || ! unzip -t gradle/wrapper/gradle-wrapper.jar >/dev/null 2>&1; then
-            echo "⚠️ Gradle wrapper JAR is missing or corrupted. Downloading standard Gradle 9.3.1 wrapper JAR..."
-            curl -sSL -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v9.3.1/gradle/wrapper/gradle-wrapper.jar
-          else
-            echo "✅ Gradle wrapper JAR is present and valid."
-          fi
+      - name: 🛠️ Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Recreate or Generate Keystore
-        run: |
-          if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > debug.keystore
-            echo "✅ debug.keystore successfully restored from GitHub Secrets"
-          elif [ -f debug.keystore.base64 ]; then
-            base64 -d debug.keystore.base64 > debug.keystore
-            echo "✅ debug.keystore successfully recreated from debug.keystore.base64 file"
-          else
-            echo "⚠️ No keystore found in Secrets or Base64 file. Generating fallback debug.keystore..."
-            keytool -genkeypair -v \
-              -keystore debug.keystore \
-              -storepass android \
-              -keypass android \
-              -alias androiddebugkey \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -dname "CN=Android Debug, O=Android, C=US"
-            echo "✅ Fallback debug.keystore generated successfully"
-          fi
+      - name: ⚙️ Setup EAS CLI
+        run: npm install -g eas-cli expo-cli
 
-      - name: Grant Execute Permission to Gradlew
-        run: chmod +x gradlew
+      - name: 📦 Install Node Dependencies
+        run: npm ci
 
-      - name: Create fallback .env file
-        run: |
-          if [ ! -f .env ]; then
-            cp .env.example .env
-          fi
+      - name: 🔍 TypeScript Verification
+        run: npx tsc --noEmit --skipLibCheck
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease --no-daemon
+      - name: 🧼 Lint Code
+        run: npm run lint --if-present
 
-      - name: Build Release Bundle (AAB)
-        run: ./gradlew bundleRelease --no-daemon
+      - name: 🧪 Execute Unit Tests
+        run: npm test --if-present
 
-      - name: Verify Generated Outputs
-        run: |
-          echo "=== Verifying APK output ==="
-          ls -la app/build/outputs/apk/release/
-          if [ ! -f app/build/outputs/apk/release/app-release.apk ]; then
-            echo "❌ app-release.apk was not generated!"
-            exit 1
-          fi
-          echo "=== Verifying AAB output ==="
-          ls -la app/build/outputs/bundle/release/
-          if [ ! -f app/build/outputs/bundle/release/app-release.aab ]; then
-            echo "❌ app-release.aab was not generated!"
-            exit 1
-          fi
-          echo "✅ Both artifacts generated successfully!"
+      - name: 📱 Prebuild Android Code
+        run: npx expo prebuild --platform android --no-install
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+      - name: 🔧 Configure Gradle Caching
+        uses: actions/cache@v4
         with:
-          name: app-release-apk
-          path: app/build/outputs/apk/release/app-release.apk
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: Upload AAB Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-aab
-          path: app/build/outputs/bundle/release/app-release.aab
-
-      - name: Create GitHub Release and Attach Artifacts
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            app/build/outputs/apk/release/app-release.apk
-            app/build/outputs/bundle/release/app-release.aab
+      - name: 🏗️ Compile Android Native App (Gradle)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon -Dorg.gradle.jvmargs="-Xmx3072m"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: "--max-old-space-size=4096"
+
+      - name: 🔐 Decode & Sign APK using Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          apksigner sign --ks android/app/release.keystore \
+            --ks-key-alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
+            --ks-pass pass:"${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
+            --key-pass pass:"${{ secrets.ANDROID_KEY_PASSWORD }}" \
+            --out android/app/build/outputs/apk/release/app-release-signed.apk \
+            android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: 📤 Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-artifacts
+          path: android/app/build/outputs/apk/
